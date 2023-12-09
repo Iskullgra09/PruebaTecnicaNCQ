@@ -3,7 +3,7 @@ var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 
-//var exampleController = require('./controllers/exampleController');
+var taskRoutes = require('./routes/taskRoutes.js');
 
 var app = express();
 
@@ -20,7 +20,7 @@ app.use((req, res, next) => {
     next();
 });
 
-//app.use('/example', exampleController);
+app.use('/task', taskRoutes);
 
 // error handler
 app.use(function (err, req, res, next) {
