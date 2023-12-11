@@ -4,6 +4,7 @@ var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 
 var taskRoutes = require('./routes/taskRoutes.js');
+var collaboratorRoutes = require('./routes/collaboratorRoutes.js');
 
 var app = express();
 
@@ -21,6 +22,7 @@ app.use((req, res, next) => {
 });
 
 app.use('/task', taskRoutes);
+app.use('/collaborator', collaboratorRoutes);
 
 // error handler
 app.use(function (err, req, res, next) {

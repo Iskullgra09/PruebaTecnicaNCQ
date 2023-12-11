@@ -1,14 +1,5 @@
 const pool = require('../connectionPG/config');
-const queries = require('../queries/taskQueries');
-
-const getTasks = (req, res) => {
-    
-    pool.query(queries.getTasks, (error, results) => {
-        if (error) throw error;
-        res.status(200).json(results.rows)
-    })
-    
-}   
+const queries = require('../queries/taskQueries');  
 
 const getTasksFiltered = (req, res) => {
 
@@ -34,11 +25,23 @@ const getTasksFiltered = (req, res) => {
             res.status(200).json(results.rows);
         })
     }
+    else if (filterType == 'Fechas'){
+        const dates = filter.split('/');
+        pool.query(queries.getTasksFilteredByDate, [dates[0],dates[1]], (error, results) => {
+            if (error) throw error;
+            res.status(200).json(results.rows);
+        })
+    }
+    else
+        pool.query(queries.getTasks, (error, results) => {
+            if (error) throw error;
+            res.status(200).json(results.rows)
+        })
+    
     
     
 } 
 
 module.exports = {
-    getTasks,
     getTasksFiltered,
 }
