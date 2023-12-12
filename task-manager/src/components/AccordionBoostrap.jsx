@@ -1,111 +1,472 @@
+import * as React from 'react';
 import { useEffect, useState } from "react";
 import Accordion from 'react-bootstrap/Accordion';
+import dayjs from 'dayjs';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import './AccordionBoostrap.css'
+import Button from 'react-bootstrap/Button';
+import Modal from 'react-bootstrap/Modal';
 
 function AccordionBoostrap() {
 
     const [tasksList, setTasksList] = useState([]);
     const [collaboratorsList, setcollaboratorsList] = useState([]);
     const [accordion, setAccordion] = useState(-1);
+    const [editStatus, setEditStatus] = useState(false);
+    const [editIndex, setEditIndex] = useState(-1);
+    const [value1, setValue1] = useState(dayjs('2022-12-11'));
+    const [value2, setValue2] = useState(dayjs('2022-12-11'));
+    const [value1Modal, setValue1Modal] = useState(dayjs('2023-12-12'));
+    const [value2Modal, setValue2Modal] = useState(dayjs('2023-12-12'));
+    const [filter2, setFilter2] = useState(false);
+    const [show, setShow] = useState(false);
 
     useEffect(() => {
         getCollaborators();
-        getTasks();
-     }, []);
+        getTasks('', 'All');
+    }, []);
 
-    const getTasks = () => {
+    const getTasks = (filter, filterType) => {
         const endPoint = 'http://127.0.0.1:3000/task/getTasksFiltered';
 
         const bodyData = {
-            filterType: 'All',
-            filter: ''
-          }
+            filterType: filterType,
+            filter: filter
+        }
 
         const endpointConfig = {
-            method:"POST",
-            headers:{
-              'Content-Type': 'application/json'
+            method: "POST",
+            headers: {
+                'Content-Type': 'application/json'
             },
-            body:JSON.stringify(bodyData)
-          }
+            body: JSON.stringify(bodyData)
+        }
 
-          fetch(endPoint, endpointConfig)
+        fetch(endPoint, endpointConfig)
             .then(response => response.json())
             .then(data => {
                 console.log(data)
-                setTasksList(data)
-           })
-           .catch(error => console.error(error));
+                formatDates(data)
+
+            })
+            .catch(error => console.error(error));
+    }
+
+    const formatDates = (tasks) => {
+
+        for (let i = 0; i < tasks.length; i++) {
+            tasks[i].fecha_inicio = tasks[i].fecha_inicio.split('T')[0];
+            tasks[i].fecha_fin = tasks[i].fecha_fin.split('T')[0];
+        }
+        setTasksList(tasks)
     }
 
     const getCollaborators = () => {
         const endPoint = 'http://127.0.0.1:3000/collaborator/getAllCollaborators';
 
         const bodyData = {
-            
-          }
+
+        }
 
         const endpointConfig = {
-            method:"POST",
-            headers:{
-              'Content-Type': 'application/json'
+            method: "POST",
+            headers: {
+                'Content-Type': 'application/json'
             },
-            body:JSON.stringify(bodyData)
-          }
+            body: JSON.stringify(bodyData)
+        }
 
-          fetch(endPoint, endpointConfig)
+        fetch(endPoint, endpointConfig)
             .then(response => response.json())
             .then(data => {
                 console.log(data)
                 setcollaboratorsList(data)
-           })
-           .catch(error => console.error(error));
+            })
+            .catch(error => console.error(error));
     }
 
     function toggleAccordion(index) {
         setAccordion(index);
+        if (editStatus && accordion != index) {
+            toggleCancel();
+        }
     }
 
+    function toggleEdit(index) {
+        setEditStatus(!editStatus);
+        setEditIndex(index);
+    }
 
-    return(
+    function toggleCancel() {
+        setEditStatus(!editStatus);
+    }
+
+    function chooseFilter1(choise) {
+        console.log(choise);
+        if (choise == 'Todas') {
+            var select = document.getElementById('inputGroupSelect05')
+
+            while (select.hasChildNodes()) {
+                select.removeChild(select.firstChild)
+            }
+
+            setFilter2(false);
+        }
+        if (choise == 'Estado') {
+            var select = document.getElementById('inputGroupSelect05')
+
+            while (select.hasChildNodes()) {
+                select.removeChild(select.firstChild)
+            }
+
+            let option1 = document.createElement("option");
+            option1.setAttribute("value", "PENDIENTE");
+            let option1Texto = document.createTextNode("PENDIENTE");
+            option1.appendChild(option1Texto);
+
+            let option2 = document.createElement("option");
+            option2.setAttribute("value", "EN PROCESO");
+            let option2Texto = document.createTextNode("EN PROCESO");
+            option2.appendChild(option2Texto);
+
+            let option3 = document.createElement("option");
+            option3.setAttribute("value", "FINALIZADA");
+            let option3Texto = document.createTextNode("FINALIZADA");
+            option3.appendChild(option3Texto);
+
+            select.appendChild(option1);
+            select.appendChild(option2);
+            select.appendChild(option3);
+
+            setFilter2(true);
+        }
+        else if (choise == 'Colaborador') {
+            var select = document.getElementById('inputGroupSelect05')
+
+            while (select.hasChildNodes()) {
+                select.removeChild(select.firstChild)
+            }
+
+            collaboratorsList.forEach(collaborator => {
+                let newOption = document.createElement("option");
+                newOption.setAttribute("value", collaborator.id);
+                let newOptionText = document.createTextNode(collaborator.nombre);
+                newOption.appendChild(newOptionText);
+                select.appendChild(newOption);
+            });
+
+            setFilter2(true);
+        }
+        else if (choise == 'Prioridad') {
+            var select = document.getElementById('inputGroupSelect05')
+
+            while (select.hasChildNodes()) {
+                select.removeChild(select.firstChild)
+            }
+
+            let option1 = document.createElement("option");
+            option1.setAttribute("value", "ALTA");
+            let option1Texto = document.createTextNode("ALTA");
+            option1.appendChild(option1Texto);
+
+            let option2 = document.createElement("option");
+            option2.setAttribute("value", "MEDIA");
+            let option2Texto = document.createTextNode("MEDIA");
+            option2.appendChild(option2Texto);
+
+            let option3 = document.createElement("option");
+            option3.setAttribute("value", "BAJA");
+            let option3Texto = document.createTextNode("BAJA");
+            option3.appendChild(option3Texto);
+
+            select.appendChild(option1);
+            select.appendChild(option2);
+            select.appendChild(option3);
+
+            setFilter2(true);
+        }
+    }
+
+    function chooseFilter2(choise) {
+        console.log(choise);
+    }
+
+    function toggleFilter() {
+        var filterType = document.getElementById('inputGroupSelect04')
+        var filter = document.getElementById('inputGroupSelect05')
+        console.log(filterType.value)
+        console.log(filter.value)
+
+        if (filterType.value == 'Todas') {
+            getTasks('', 'All');
+        }
+        else if (filterType.value == 'Colaborador') {
+            getTasks(filter.value, 'Collaborator');
+        }
+        else if (filterType.value == 'Prioridad') {
+            getTasks(filter.value, 'Priority');
+        }
+        else if (filterType.value == 'Estado') {
+            getTasks(filter.value, 'State');
+        }
+
+    }
+
+    const handleClose = () => setShow(false);
+    const handleShow = () => setShow(true);
+
+    const addNewTask = () => {
+        
+    }
+
+    return (
         <>
-            <div className="container">
+            <h1 className='titulo'>
+                Organizador de tareas
+            </h1>
+
+            <button type="button" className="btn btn-info btn-flotante" onClick={handleShow}>
+                <i className="bi bi-clipboard-plus-fill icon-btn-flotante"></i>
+            </button>
+            <div className='centerCard'>
                 <div>
-                    <h1>Un subtitulo talvez?</h1>
-                </div>
-                <div>
-                    <Accordion>
-                        {tasksList.map((task, index) => (
-                            <div key={index} onClick={() => toggleAccordion(index)}>
-                                <Accordion.Item eventKey={index}>
-                                    <Accordion.Header>
-                                        {task.descripcion}
-                                    </Accordion.Header>
-                                    <Accordion.Body>
-                                        <div>
-                                            {collaboratorsList[task.colaborador_id-1]['nombre']}
-                                        </div>
-                                        <div>
-                                            {task.estado}
-                                        </div>
-                                        <div>
-                                            {task.prioridad}
-                                        </div>
-                                        <div>
-                                            {task.fecha_inicio}
-                                        </div>
-                                        <div>
-                                            {task.fecha_fin}
-                                        </div>
-                                        <div>
-                                            {task.notas}
-                                        </div>
-                                    </Accordion.Body>
-                                </Accordion.Item>
+                    <div className="card text-center">
+                        <div className="card-body">
+                            <div className='row'>
+                                <div className="col-md-5 marginInputs">
+                                    <>
+                                    </>
+                                </div>
+                                <div className='col-md-3 marginInputs'>
+                                    <select className="form-select" id="inputGroupSelect04" defaultValue="Todas" onChange={(e) => chooseFilter1(e.target.value)}>
+                                        <option value="Todas">Todas</option>
+                                        <option value="Colaborador">Colaborador</option>
+                                        <option value="Estado">Estado</option>
+                                        <option value="Prioridad">Prioridad</option>
+                                        <option value="Fechas">Fechas</option>
+                                    </select>
+                                </div>
+
+                                <div className='col-md-3 marginInputs'>
+                                    <select disabled={!filter2 ? 'disabled' : ''} className="form-select" id="inputGroupSelect05" onChange={(e) => chooseFilter2(e.target.value)}>
+
+                                    </select>
+                                </div>
+
+                                <div className="col-md-1 marginInputs">
+                                    <button className="btn btn-success" type="button" onClick={() => toggleFilter()}>Filtrar</button>
+                                </div>
+
+
+                                <div>
+                                    <Accordion>
+                                        {tasksList.map((task, index) => (
+                                            <div key={index} onClick={() => toggleAccordion(index)}>
+                                                <Accordion.Item eventKey={index}>
+                                                    <Accordion.Header>
+                                                        {task.descripcion}
+                                                    </Accordion.Header>
+                                                    <Accordion.Body>
+                                                        <form>
+                                                            <div className="row">
+                                                                <div className="col-md-4 marginInputs">
+                                                                    <h6>Encargado</h6>
+                                                                    {editStatus &&
+                                                                        <div className="mb-2">
+                                                                            <select className="form-select" defaultValue={task.colaborador_id} id="inputGroupSelect01">
+                                                                                {collaboratorsList.map((collaborator, index2) => (
+                                                                                    <option key={index2} value={collaborator.id}>{collaborator.nombre}</option>
+                                                                                ))}
+                                                                            </select>
+                                                                        </div>
+
+                                                                    }
+                                                                    {!editStatus &&
+                                                                        <label>{collaboratorsList[task.colaborador_id - 1]['nombre']}</label>
+                                                                    }
+                                                                </div>
+                                                                <div className="col-md-4 marginInputs">
+                                                                    <h6>Descripcion</h6>
+                                                                    {editStatus &&
+                                                                        <input type="text" className="form-control" id="inputDescription" defaultValue={task.descripcion}></input>
+                                                                    }
+                                                                    {!editStatus &&
+                                                                        <label className="mb-3">{task.descripcion}</label>
+                                                                    }
+                                                                </div>
+                                                                <div className="col-md-4 marginInputs">
+                                                                    <h6>Estado</h6>
+                                                                    {editStatus &&
+                                                                        <div className="mb-2">
+                                                                            <select className="form-select" defaultValue={task.estado} id="inputGroupSelect02">
+                                                                                <option value="PENDIENTE">PENDIENTE</option>
+                                                                                <option value="EN PROCESO">EN PROCESO</option>
+                                                                                <option value="FINALIZADA">FINALIZADA</option>
+                                                                            </select>
+                                                                        </div>
+                                                                    }
+                                                                    {!editStatus &&
+                                                                        <label>{task.estado}</label>
+                                                                    }
+                                                                </div>
+                                                            </div>
+                                                            <div className="row">
+                                                                <div className="col-md-4 marginInputs">
+                                                                    <h6>Prioridad</h6>
+                                                                    {editStatus &&
+                                                                        <div className="mb-2">
+                                                                            <select className="form-select" defaultValue={task.prioridad} id="inputGroupSelect03">
+                                                                                <option value="ALTA">ALTA</option>
+                                                                                <option value="MEDIA">MEDIA</option>
+                                                                                <option value="BAJA">BAJA</option>
+                                                                            </select>
+                                                                        </div>
+                                                                    }
+                                                                    {!editStatus &&
+                                                                        <label>{task.prioridad}</label>
+                                                                    }
+                                                                </div>
+                                                                <div className="col-md-4 marginInputs">
+                                                                    <h6>Fecha inicio</h6>
+                                                                    {editStatus &&
+                                                                        <div>
+                                                                            <DatePicker
+                                                                                value={dayjs(task.fecha_inicio)}
+                                                                                onChange={(newValue) => setValue1(newValue)}
+                                                                            />
+                                                                        </div>
+                                                                    }
+                                                                    {!editStatus &&
+                                                                        <label>{task.fecha_inicio}</label>
+                                                                    }
+                                                                </div>
+                                                                <div className="col-md-4 marginInputs">
+                                                                    <h6>Fecha final</h6>
+                                                                    {editStatus &&
+                                                                        <div>
+                                                                            <DatePicker
+                                                                                value={dayjs(task.fecha_fin)}
+                                                                                onChange={(newValue) => setValue2(newValue)}
+                                                                            />
+                                                                        </div>
+                                                                    }
+                                                                    {!editStatus &&
+                                                                        <label>{task.fecha_fin}</label>
+                                                                    }
+                                                                </div>
+                                                            </div>
+                                                            <div className="row">
+                                                                <div className="col-md-12 marginInputs">
+                                                                    <h6>Notas</h6>
+                                                                    {editStatus &&
+                                                                        <input type="text" className="form-control" id="inputNotes" defaultValue={task.notas}></input>
+                                                                    }
+                                                                    {!editStatus &&
+                                                                        <label className="mb-3">{task.notas}</label>
+                                                                    }
+                                                                </div>
+                                                            </div>
+                                                            <div>
+                                                                {editStatus &&
+                                                                    <div className='btns-center'>
+                                                                        <div className="row">
+                                                                            <div className="col-md-3 marginInputs btns-edit">
+                                                                                <button className="btn btn-danger" type="button" onClick={() => toggleCancel(index)}>Cancelar</button>
+                                                                            </div>
+                                                                            <div className="col-md-3 marginInputs btns-edit">
+                                                                                <button className="btn btn-success" type="button" onClick={() => toggleConfirmEdit(index)}>Confirmar</button>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+
+                                                                }
+                                                                {!editStatus && task.estado != 'FINALIZADA' &&
+                                                                    <button className="btn btn-primary" type="button" onClick={() => toggleEdit(index)}>Editar</button>
+                                                                }
+                                                            </div>
+                                                        </form>
+                                                    </Accordion.Body>
+                                                </Accordion.Item>
+                                            </div>
+                                        ))}
+                                    </Accordion>
+                                </div>
+
                             </div>
-                        ))}
-                    </Accordion>
+                        </div>
+                    </div>
                 </div>
+
+
             </div>
+
+            <Modal show={show} onHide={handleClose}>
+                <Modal.Header closeButton>
+                    <Modal.Title>Nueva tarea</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <div className='modal-padding'>
+                        <h6>Descripcion</h6>
+                        <input type="text" className="form-control" id="inputDescriptionModal" placeholder='Agregue una descripcion...'></input>
+                    </div>
+                    <div className='modal-padding'>
+                        <h6>Encargado</h6>
+                        <div className="mb-2">
+                            <select className="form-select" id="inputGroupSelect01Modal">
+                                {collaboratorsList.map((collaborator, index2) => (
+                                    <option key={index2} value={collaborator.id}>{collaborator.nombre}</option>
+                                ))}
+                            </select>
+                        </div>
+                    </div>
+                    <div className='modal-padding'>
+                        <h6>Estado</h6>
+                        <div className="mb-2">
+                            <select className="form-select" defaultValue="PENDIENTE" id="inputGroupSelect02Modal">
+                                <option value="PENDIENTE">PENDIENTE</option>
+                                <option value="EN PROCESO">EN PROCESO</option>
+                                <option value="FINALIZADA">FINALIZADA</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div className='modal-padding'>
+                        <h6>Prioridad</h6>
+                        <div className="mb-2">
+                            <select className="form-select" id="inputGroupSelect03Modal">
+                                <option value="ALTA">ALTA</option>
+                                <option value="MEDIA">MEDIA</option>
+                                <option value="BAJA">BAJA</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div className='modal-padding'>
+                        <h6>Fecha inicio</h6>
+                        <DatePicker
+                            value={value1Modal}
+                            onChange={(newValue) => SetValue1Modal(newValue)}
+                        />
+                    </div>
+                    <div>
+                        <h6 className='modal-padding'>Fecha final</h6>
+                        <DatePicker
+                            value={value2Modal}
+                            onChange={(newValue) => SetValue2Modal(newValue)}
+                        />
+                    </div>
+                    <div className='modal-padding'>
+                        <h6>Notas</h6>
+                        <input type="text" className="form-control" id="inputNotes" placeholder='Agregue una nota...'></input>
+                    </div>
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="danger" onClick={handleClose}>
+                        Cerrar
+                    </Button>
+                    <Button variant="primary" onClick={addNewTask}>
+                        Agregar Tarea
+                    </Button>
+                </Modal.Footer>
+            </Modal>
         </>
     )
 }

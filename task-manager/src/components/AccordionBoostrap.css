@@ -1,0 +1,44 @@
+.centerCard{
+    padding-left:20%;
+    padding-right:20%;
+    padding-top:2%;
+}
+
+.marginInputs{
+    margin-bottom: 3rem;
+}
+
+.titulo{
+    text-align: center;
+    color: white;
+    padding-top: 5%;
+}
+
+.btn-flotante {
+
+	position: fixed;
+	bottom: 40px;
+	right: 40px;
+    width: 70px;
+    height: 70px;
+    text-align: center;
+    border-radius: 50% !important;
+
+}
+
+.icon-btn-flotante{
+    font-size: 22px;
+}
+
+.btns-center{
+    display: flex;
+    justify-content: center;
+}
+
+.btns-edit{
+    margin-left: 25px;
+}
+
+.modal-padding{
+    padding-bottom: 5px;
+}
