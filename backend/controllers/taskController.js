@@ -50,8 +50,30 @@ const insertTask = (req, res) => {
     var endDate = req.body.endDate;
     var notes = req.body.notes;
 
+
     pool.query(queries.insertTask, [description, collaborator_id, state, priority, startDate, endDate, notes], (error, results) => {
         if (error) throw error;
+        console.log(results)
+        res.status(200).json(results.rows);
+    })
+
+}
+
+const updateTask = (req, res) => {
+
+    var id = req.body.id;
+    var description = req.body.description;
+    var collaborator_id = req.body.collaborator_id;
+    var state = req.body.state;
+    var priority = req.body.priority;
+    var startDate = req.body.startDate;
+    var endDate = req.body.endDate;
+    var notes = req.body.notes;
+
+
+    pool.query(queries.updateTask, [description, collaborator_id, state, priority, startDate, endDate, notes, id], (error, results) => {
+        if (error) throw error;
+        console.log(results)
         res.status(200).json(results.rows);
     })
 
@@ -60,4 +82,5 @@ const insertTask = (req, res) => {
 module.exports = {
     getTasksFiltered,
     insertTask,
+    updateTask,
 }

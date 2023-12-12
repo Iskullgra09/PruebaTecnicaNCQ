@@ -14,10 +14,10 @@ function AccordionBoostrap() {
     const [accordion, setAccordion] = useState(-1);
     const [editStatus, setEditStatus] = useState(false);
     const [editIndex, setEditIndex] = useState(-1);
-    const [value1, setValue1] = useState(dayjs('2022-12-11'));
-    const [value2, setValue2] = useState(dayjs('2022-12-11'));
-    const [value1Modal, setValue1Modal] = useState(dayjs('2023-12-12'));
-    const [value2Modal, setValue2Modal] = useState(dayjs('2023-12-12'));
+    const [startDate, setStartDate] = useState(dayjs('2022-12-11'));
+    const [endDate, setEndDate] = useState(dayjs('2022-12-11'));
+    const [startDateModal, SetStartDateModal] = useState(dayjs('2023-12-12'));
+    const [endDateModal, setEndDateModal] = useState(dayjs('2023-12-12'));
     const [filter2, setFilter2] = useState(false);
     const [show, setShow] = useState(false);
 
@@ -92,13 +92,61 @@ function AccordionBoostrap() {
         }
     }
 
-    function toggleEdit(index) {
+    function toggleEdit(task, index) {
+        console.log(task.fecha_inicio)
+        console.log(task.fecha_fin)
         setEditStatus(!editStatus);
         setEditIndex(index);
+        setStartDate(dayjs(task.fecha_inicio));
+        setEndDate(dayjs(task.fecha_fin));
     }
 
     function toggleCancel() {
         setEditStatus(!editStatus);
+    }
+
+    function toggleConfirmEdit(task) {
+
+        var id = task.id
+        var description = task.descripcion
+        var collaborator_id = task.colaborador_id
+        var state = task.estado
+        var priority = task.prioridad
+        var startDate = dayjs(task.fecha_inicio).format('YYYY-MM-DD')
+        var endDate = dayjs(task.fecha_fin).format('YYYY-MM-DD')
+        var notes = task.notas
+
+        const bodyData = {
+            id : id,
+            description: description,
+            collaborator_id: collaborator_id,
+            state: state,
+            priority: priority,
+            startDate: startDate,
+            endDate: endDate,
+            notes: notes
+        }
+
+        console.log(bodyData);
+
+        const endPoint = 'http://127.0.0.1:3000/task/updateTask';
+
+        const endpointConfig = {
+            method: "POST",
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(bodyData)
+        }
+
+        fetch(endPoint, endpointConfig)
+            .then(response => response.json())
+            .then(data => {
+                getTasks('', 'All');
+                toggleCancel()
+
+            })
+            .catch(error => console.error(error));
     }
 
     function chooseFilter1(choise) {
@@ -216,7 +264,44 @@ function AccordionBoostrap() {
     const handleShow = () => setShow(true);
 
     const addNewTask = () => {
-        
+        var description = document.getElementById('inputDescriptionModal').value
+        var collaborator_id = parseInt(document.getElementById('inputGroupSelect01Modal').value)
+        var state = document.getElementById('inputGroupSelect02Modal').value
+        var priority = document.getElementById('inputGroupSelect03Modal').value
+        var startDate = dayjs(startDateModal).format('YYYY-MM-DD')
+        var endDate = dayjs(endDateModal).format('YYYY-MM-DD')
+        var notes = document.getElementById('inputNotesModal').value
+
+        const bodyData = {
+            description: description,
+            collaborator_id: collaborator_id,
+            state: state,
+            priority: priority,
+            startDate: startDate,
+            endDate: endDate,
+            notes: notes
+        }
+
+        console.log(bodyData);
+
+        const endPoint = 'http://127.0.0.1:3000/task/insertNewTask';
+
+        const endpointConfig = {
+            method: "POST",
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(bodyData)
+        }
+
+        fetch(endPoint, endpointConfig)
+            .then(response => response.json())
+            .then(data => {
+                getTasks('', 'All');
+                handleClose();
+
+            })
+            .catch(error => console.error(error));
     }
 
     return (
@@ -261,7 +346,7 @@ function AccordionBoostrap() {
                                 <div>
                                     <Accordion>
                                         {tasksList.map((task, index) => (
-                                            <div key={index} onClick={() => toggleAccordion(index)}>
+                                            <div key={index} onClick={() => toggleAccordion(task, index)}>
                                                 <Accordion.Item eventKey={index}>
                                                     <Accordion.Header>
                                                         {task.descripcion}
@@ -329,10 +414,11 @@ function AccordionBoostrap() {
                                                                 <div className="col-md-4 marginInputs">
                                                                     <h6>Fecha inicio</h6>
                                                                     {editStatus &&
+                                                                        
                                                                         <div>
                                                                             <DatePicker
-                                                                                value={dayjs(task.fecha_inicio)}
-                                                                                onChange={(newValue) => setValue1(newValue)}
+                                                                                value={startDate}
+                                                                                onChange={(newValue) => setStartDate(newValue)}
                                                                             />
                                                                         </div>
                                                                     }
@@ -345,8 +431,8 @@ function AccordionBoostrap() {
                                                                     {editStatus &&
                                                                         <div>
                                                                             <DatePicker
-                                                                                value={dayjs(task.fecha_fin)}
-                                                                                onChange={(newValue) => setValue2(newValue)}
+                                                                                value={endDate}
+                                                                                onChange={(newValue) => setEndDate(newValue)}
                                                                             />
                                                                         </div>
                                                                     }
@@ -371,17 +457,17 @@ function AccordionBoostrap() {
                                                                     <div className='btns-center'>
                                                                         <div className="row">
                                                                             <div className="col-md-3 marginInputs btns-edit">
-                                                                                <button className="btn btn-danger" type="button" onClick={() => toggleCancel(index)}>Cancelar</button>
+                                                                                <button className="btn btn-danger" type="button" onClick={() => toggleCancel()}>Cancelar</button>
                                                                             </div>
                                                                             <div className="col-md-3 marginInputs btns-edit">
-                                                                                <button className="btn btn-success" type="button" onClick={() => toggleConfirmEdit(index)}>Confirmar</button>
+                                                                                <button className="btn btn-success" type="button" onClick={() => toggleConfirmEdit(task)}>Confirmar</button>
                                                                             </div>
                                                                         </div>
                                                                     </div>
 
                                                                 }
                                                                 {!editStatus && task.estado != 'FINALIZADA' &&
-                                                                    <button className="btn btn-primary" type="button" onClick={() => toggleEdit(index)}>Editar</button>
+                                                                    <button className="btn btn-primary" type="button" onClick={() => toggleEdit(task, index)}>Editar</button>
                                                                 }
                                                             </div>
                                                         </form>
@@ -442,20 +528,20 @@ function AccordionBoostrap() {
                     <div className='modal-padding'>
                         <h6>Fecha inicio</h6>
                         <DatePicker
-                            value={value1Modal}
-                            onChange={(newValue) => SetValue1Modal(newValue)}
+                            value={startDateModal}
+                            onChange={(newValue) => SetStartDateModal(newValue)}
                         />
                     </div>
                     <div>
                         <h6 className='modal-padding'>Fecha final</h6>
                         <DatePicker
-                            value={value2Modal}
-                            onChange={(newValue) => SetValue2Modal(newValue)}
+                            value={endDateModal}
+                            onChange={(newValue) => setEndDateModal(newValue)}
                         />
                     </div>
                     <div className='modal-padding'>
                         <h6>Notas</h6>
-                        <input type="text" className="form-control" id="inputNotes" placeholder='Agregue una nota...'></input>
+                        <input type="text" className="form-control" id="inputNotesModal" placeholder='Agregue una nota...'></input>
                     </div>
                 </Modal.Body>
                 <Modal.Footer>
