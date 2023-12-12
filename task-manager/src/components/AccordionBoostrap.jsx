@@ -238,17 +238,20 @@ function AccordionBoostrap() {
         }
         else if (choise == 'Todas') {
 
-            setTimeout(() => {
-                var select = document.getElementById('inputGroupSelect05')
-
-                while (select.hasChildNodes()) {
-                    select.removeChild(select.firstChild)
-                }
-
-                setFilter2(false);
-                setFilterOption(null);
-            }, 500);
-
+            if (filterOption == 'noDates') {
+                setTimeout(() => {
+                
+                    var select = document.getElementById('inputGroupSelect05')
+    
+                    while (select.hasChildNodes()) {
+                        select.removeChild(select.firstChild)
+                    }
+    
+                    setFilter2(false);
+                    setFilterOption(null);
+                }, 500);
+            }
+            setFilterOption(null);
         }
         else if (choise == 'Estado') {
             setFilterOption('noDates');
