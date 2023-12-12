@@ -11,7 +11,7 @@
 .titulo{
     text-align: center;
     color: white;
-    padding-top: 5%;
+    padding-top: 2%;
 }
 
 .btn-flotante {
@@ -31,8 +31,7 @@
 }
 
 .btns-center{
-    display: flex;
-    justify-content: center;
+    margin-right: 5px;
 }
 
 .btns-edit{
@@ -41,4 +40,21 @@
 
 .modal-padding{
     padding-bottom: 5px;
+}
+
+.alert-flotante {
+
+	position: fixed;
+	top: 20px;
+	right: 40px;
+    text-align: center;
+}
+
+.required-field {
+    color: red;
+}
+
+.datepickers-height {
+    height: 40px !important;
+    position: absolute;
 }
